@@ -39,4 +39,45 @@ server.get("/api/posts/:id", (req, res) => {
     });
 });
 
+server.post("/api/posts", (req, res) => {
+  const body = req.body;
+  if (!body.title || !body.contents) {
+    res
+      .status(400)
+      .json({ message: "Please provide title and contents for the post" });
+    return;
+  } else {
+    Posts.insert(body)
+      .then((post) => {
+        res.status(201).json(post);
+      })
+      .catch((err) => {
+        res.status(500).json({
+          message: "There was an error while saving the post to the database",
+        });
+      });
+  }
+});
+
+server.put("/api/posts/:id", (req, res) => {
+  const post = req.body;
+  Posts.update(req.params.id, post)
+    .then((posts) => {
+      if (posts) {
+        res.status(200).json(posts);
+      } else {
+        if (!body.title || !body.contents) {
+          res.status(400).json({
+            message: "Please provide title and contents for the post",
+          });
+        }
+      }
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ message: "The post information could not be modified" });
+    });
+});
+
 module.exports = server;
