@@ -56,13 +56,16 @@ router.get("/:id/comments", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const postInfo = req.body;
-  if (!postInfo.title || !postInfo.contents) {
+  const { title, contents } = req.body;
+  if (!title || !contents) {
     res
       .status(400)
       .json({ message: "Please provide title and contents for the post" });
   } else {
-    Posts.insert(postInfo)
+    Posts.insert({ title, contents })
+      .then(({ id }) => {
+        return Posts.findById(id);
+      })
       .then((post) => {
         res.status(201).json(post);
       })
