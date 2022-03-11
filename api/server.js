@@ -40,18 +40,18 @@ server.get("/api/posts/:id", (req, res) => {
 });
 
 server.post("/api/posts", (req, res) => {
-  const body = req.body;
-  if (!body.title || !body.contents) {
+  const postInfo = req.body;
+  if (!postInfo.title || !postInfo.contents) {
     res
       .status(400)
       .json({ message: "Please provide title and contents for the post" });
-    return;
   } else {
-    Posts.insert(body)
-      .then((newPost) => {
-        res.status(201).json(newPost);
+    Posts.insert(postInfo)
+      .then((post) => {
+        res.status(201).json(post);
       })
       .catch((error) => {
+        console.log(error);
         res.status(500).json({
           message: "There was an error while saving the post to the database",
         });
@@ -60,28 +60,31 @@ server.post("/api/posts", (req, res) => {
 });
 
 server.put("/api/posts/:id", (req, res) => {
-  const post = req.body;
-  Posts.update(req.params.id, post)
-    .then((post) => {
-      if (!post) {
-        res
-          .status(404)
-          .json({ message: "The post with the specified ID does not exist" });
-      } else {
-        if (!req.body.title || !req.body.contents) {
-          res.status(400).json({
-            message: "Please provide title and contents for the post",
-          });
-        } else {
-          res.status(200).json(post);
-        }
-      }
-    })
-    .catch((error) => {
-      res
-        .status(500)
-        .json({ message: "The post information could not be modified" });
+  const changes = req.body;
+  const { id } = req.params;
+
+  if (!changes.title || !changes.contents) {
+    res.status(400).json({
+      message: "Please provide title and contents for the post.",
     });
+  } else {
+    Posts.update(id, changes)
+      .then((post) => {
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({
+            message: "The post with the specified ID does not exist.",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res
+          .status(500)
+          .json({ message: "The post information could not be modified." });
+      });
+  }
 });
 
 server.delete("/api/posts/:id", (req, res) => {
