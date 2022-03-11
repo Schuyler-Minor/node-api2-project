@@ -106,21 +106,37 @@ router.put("/:id", (req, res) => {
   }
 });
 
-router.delete("/:id", (req, res) => {
-  Posts.remove(req.params.id)
-    .then((post) => {
-      if (!post) {
-        res
-          .status(404)
-          .json({ message: "The post with the specified ID does not exist" });
-      } else {
-        res.status(200).json(post);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).json({ message: "The post could not be removed" });
-    });
+router.delete("/:id", async (req, res) => {
+  try {
+    const post = await Posts.findById(req.params.id);
+    if (!post) {
+      res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist" });
+    } else {
+      await Posts.remove(req.params.id);
+      res.json(post);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "The post could not be removed" });
+  }
 });
+
+// router.delete("/:id", (req, res) => {
+//   Posts.remove(req.params.id)
+//     .then((post) => {
+//       if (!post) {
+//         res
+//           .status(404)
+//           .json({ message: "The post with the specified ID does not exist" });
+//       } else {
+//         res.status(200).json(post);
+//       }
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//       res.status(500).json({ message: "The post could not be removed" });
+//     });
+// });
 
 module.exports = router;
