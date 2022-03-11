@@ -39,6 +39,25 @@ server.get("/api/posts/:id", (req, res) => {
     });
 });
 
+server.get("/api/posts/:id/comments", (req, res) => {
+  Posts.findPostComments(req.params.id)
+    .then((comment) => {
+      if (!comment) {
+        res.status(404).json({
+          message: "The post with the specified ID does not exist.",
+        });
+      } else {
+        res.status(200).json(comment);
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({
+        error: "The post information could not be retrieved.",
+      });
+    });
+});
+
 server.post("/api/posts", (req, res) => {
   const postInfo = req.body;
   if (!postInfo.title || !postInfo.contents) {
