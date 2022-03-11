@@ -36,24 +36,42 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.get("/:id/comments", (req, res) => {
-  Posts.findPostComments(req.params.id)
-    .then((comment) => {
-      if (!comment) {
-        res.status(404).json({
-          message: "The post with the specified ID does not exist.",
-        });
-      } else {
-        res.status(200).json(comment);
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).json({
-        error: "The post information could not be retrieved.",
-      });
+router.get("/:id/comments", async (req, res) => {
+  try {
+    const post = await Posts.findById(req.params.id);
+    if (!post) {
+      res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist" });
+    } else {
+      const comments = await Posts.findPostComments(req.params.id);
+      res.json(comments);
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "The post information could not be retrieved.",
     });
+  }
 });
+
+// router.get("/:id/comments", (req, res) => {
+//   Posts.findPostComments(req.params.id)
+//     .then((comment) => {
+//       if (!comment) {
+//         res.status(404).json({
+//           message: "The post with the specified ID does not exist.",
+//         });
+//       } else {
+//         res.status(200).json(comment);
+//       }
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//       res.status(500).json({
+//         error: "The post information could not be retrieved.",
+//       });
+//     });
+// });
 
 router.post("/", (req, res) => {
   const { title, contents } = req.body;
@@ -102,7 +120,9 @@ router.put("/:id", (req, res) => {
         }
       })
       .then((post) => {
-        res.json(post);
+        if (post) {
+          res.json(post);
+        }
       })
       .catch((err) => {
         res.status(500).json({
